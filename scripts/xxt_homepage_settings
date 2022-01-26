@@ -1,0 +1,11 @@
+INSERT INTO xxt_homepage_settings (property,property_attribute,property_value) VALUES
+	 ('Название приложения','name_application','HOMEPAGE'),
+	 ('Заголовок страницы логина','header_login_page','Добро пожаловать'),
+	 ('Title страницы логина','title_login_page','Логин'),
+	 ('Заголовок страницы регистрации','header_registration_page','Регистрация'),
+	 ('Title страницы регистрации','title_registration_page','Регистрация'),
+	 ('Заголовок страницы восстановления пароля','header_forgot_password_page','Забыли пароль?'),
+	 ('Title страницы восстановления пароля','title_forgot_password_page','А теперь все, все все все'),
+	 ('Title страницы Media-Library','title_media_library_page','Media-Library'),
+	 ('Header страницы Media-Library','header_media_library_page','Media-Library'),
+	 ('Надпись в строке поиска','search_field_value','Поиск');

@@ -1,0 +1,30 @@
+{% extends 'widgets/widgets-base.html' %} {% block container %}
+<nav class="navbar search-panel-container">
+    <h4>{{ header }}</h4>
+    <input id="searchField" class="search-panel form-control me-2" type="search" placeholder="{{ search_field_value }}" aria-label="Search">
+</nav>
+
+<div class="bd-content mt-3">
+    <div id="widgetsContainer"></div>
+</div>
+
+<div class="modal fade" id="memoryWidgetModal" tabindex="-1" aria-labelledby="memoryWidgetModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-memory-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 id="memoryWidgetModalTitle" class="modal-title"></h6>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <textarea id="memoryWidgetModalContent" class="form-control modal-memory-content" readonly></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block script%} {% load static %}
+<script type="text/javascript" src="{% static '/project/js/widgets.js' %}"></script>
+{% endblock %}

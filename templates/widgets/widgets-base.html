@@ -1,0 +1,15 @@
+{% extends 'base.html' %} {% block title %} {{ title }} {% endblock %} {% block page_content %}
+
+<div class="container mt-5">
+    {% block container %} {% endblock %}
+</div>
+<div id="spinner" class="d-flex position-absolute top-50 start-50" hidden="false">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+{% endblock %} {% block name_page %}
+<script>
+    var namePage = '{{name_page}}'
+</script>
+{% endblock %}

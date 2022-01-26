@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.generic import CreateView, TemplateView
 
 from accounts.forms import RegistrationUserForm, LoginUserForm
-from accounts.utils import AccountDataMixin
+from accounts.mixins import AccountDataMixin
 
 
 @method_decorator(csrf_protect, name='dispatch')
