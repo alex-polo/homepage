@@ -1,4 +1,5 @@
-const endpointTimeUrl = currentLocation.href + 'home/time'
+// const endpointTimeUrl = currentLocation.href + '/home/time'
+const endpointTimeUrl = window.location + '/home/time'
 
 
 function isInternetExplorer() {
