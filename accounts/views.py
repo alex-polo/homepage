@@ -17,9 +17,6 @@ class RegistrationUsersView(AccountDataMixin, CreateView):
     name_page = 'registration_page'
     template_name = 'account/registration.html'
     form_class = RegistrationUserForm
-    name_application = 'ACCOUNTS'
-    title = 'Регистрация'
-    header = 'Регистрация'
 
     def form_valid(self, form):
         """Security check complete. Log the user in."""
@@ -34,9 +31,6 @@ class LoginUsersView(AccountDataMixin, LoginView):
     name_page = 'login_page'
     template_name = 'account/login.html'
     form_class = LoginUserForm
-    name_application = 'ACCOUNTS'
-    title = 'Логин'
-    header = 'Логин'
 
     def form_valid(self, form):
         """Security check complete. Log the user in."""

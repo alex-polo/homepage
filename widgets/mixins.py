@@ -98,16 +98,16 @@ class HomePageMixin:
         return context
 
 
-class MemoryCardsMixin:
+class MemoryWidgetsMixin:
 
     @classmethod
     def response_context(cls, request, pk):
-        logger.debug('Start method get in class MemoryCardsMixin')
+        logger.debug('Start method get in class MemoryWidgetsMixin')
         user = request.user
         page = PageWidgets.objects.get(const_sys_property='shared_page')
         logger.debug('Getting shared_page')
-        query_set_cards_groups = WidgetsGroups.objects.all()
-        anon_card_group = query_set_cards_groups.filter(page=page)
+        query_set_widgets_groups = WidgetsGroups.objects.all()
+        anon_card_group = query_set_widgets_groups.filter(page=page)
         logger.debug(f'Find shared widgets groups: {list(anon_card_group)}')
         logger.debug(f'Find user: {user}')
 
@@ -115,13 +115,13 @@ class MemoryCardsMixin:
             logger.debug(f'User {user} is authenticated')
             user_groups = user.groups.all()
             logger.debug(f'Find user groups: {user_groups}')
-            user_cards_groups = WidgetsGroups.objects.filter(access_group__in=user_groups)
-            logger.debug(f'Find widgets groups: {list(user_cards_groups)}')
-            anon_and_user_cards_groups = anon_card_group | user_cards_groups
-            memory_card = get_object_or_404(MemoryWidgets, id=pk, card_groups__in=anon_and_user_cards_groups)
+            user_widgets_groups = WidgetsGroups.objects.filter(access_group__in=user_groups)
+            logger.debug(f'Find widgets groups: {list(user_widgets_groups)}')
+            anon_and_user_widgets_groups = anon_card_group | user_widgets_groups
+            memory_card = get_object_or_404(MemoryWidgets, id=pk, widgets_groups__in=anon_and_user_widgets_groups)
         else:
             logger.debug('User is not authenticated')
-            memory_card = get_object_or_404(MemoryWidgets, id=pk, card_groups__in=anon_card_group)
+            memory_card = get_object_or_404(MemoryWidgets, id=pk, widgets_groups__in=anon_card_group)
 
         logger.debug('Next step return memory cards value')
         value = {'name': memory_card.name, 'content': memory_card.content}
@@ -153,38 +153,38 @@ class WidgetsMixin:
         logger.debug(f'attribute page: {cls.page.const_sys_property}')
 
     @classmethod
-    def filter_widgets(cls, cards_groups, search_keywords, browser):
+    def filter_widgets(cls, widgets_groups, search_keywords, browser):
         list_widgets = []
-        for group in cards_groups:
+        for group in widgets_groups:
             if search_keywords is not None and len(search_keywords) > 0:
                 logger.debug(f'Search keywords is not None')
-                # widgets = list(LinkCards.objects.filter(is_active=True, card_groups=group, browser_type=browser,
+                # widgets = list(LinkCards.objects.filter(is_active=True, widgets_groups=group, browser_type=browser,
                 #                                         name__icontains=search_keywords).values())
                 widgets = \
                     [card for card in
-                     LinkWidgets.objects.filter(is_active=True, card_groups=group, browser_type=browser).values()
+                     LinkWidgets.objects.filter(is_active=True, widgets_groups=group, browser_type=browser).values()
                      if search_keywords.lower() in card.get('name').lower()]
 
                 logger.debug(f'Find link cards for group: {group}')
 
                 # widgets.extend(
-                #     MemoryCards.objects.filter(is_active=True, card_groups=group, browser_type=browser,
+                #     MemoryCards.objects.filter(is_active=True, widgets_groups=group, browser_type=browser,
                 #                                name__icontains=search_keywords).values()
                 # )
                 widgets.extend(
                     [card for card in
-                     MemoryWidgets.objects.filter(is_active=True, card_groups=group, browser_type=browser).values()
+                     MemoryWidgets.objects.filter(is_active=True, widgets_groups=group, browser_type=browser).values()
                      if search_keywords.lower() in card.get('name').lower()]
                 )
                 logger.debug(f'Find memory cards for group: {group}')
             else:
                 logger.debug(f'Search keywords is None')
                 widgets = \
-                    list(LinkWidgets.objects.filter(is_active=True, card_groups=group,
+                    list(LinkWidgets.objects.filter(is_active=True, widgets_groups=group,
                                                     browser_type=browser).values())
                 logger.debug(f'Find link cards for group: {group}')
 
-                widgets.extend(list(MemoryWidgets.objects.filter(is_active=True, card_groups=group,
+                widgets.extend(list(MemoryWidgets.objects.filter(is_active=True, widgets_groups=group,
                                                                  browser_type=browser).values()))
                 logger.debug(f'Find memory cards for group: {group}')
 
@@ -200,10 +200,10 @@ class WidgetsMixin:
         """
         try:
             self.request_meta(request)
-            cards_groups = WidgetsGroups.objects.filter(page=self.page)
-            logger.debug(f'finding groups for page: {list(cards_groups)}')
+            widgets_groups = WidgetsGroups.objects.filter(page=self.page)
+            logger.debug(f'finding groups for page: {list(widgets_groups)}')
             logger.debug(f'Start filter cards for anon user')
-            response = self.filter_widgets(cards_groups, self.search_keywords, self.browser)
+            response = self.filter_widgets(widgets_groups, self.search_keywords, self.browser)
             logger.debug(f'response: {response}')
             return JsonResponse(response)
         except Exception as error:
@@ -228,9 +228,9 @@ class PrivateWidgetsMixin(WidgetsMixin):
                 self.request_meta(request)
                 user_groups = user.groups.all()
                 logger.debug(f'user groups: {list(user_groups)}')
-                cards_groups = WidgetsGroups.objects.filter(page=self.page, access_group__in=user_groups)
-                logger.debug(f'user card groups: {list(cards_groups)}')
-                response = self.filter_widgets(cards_groups, self.search_keywords, self.browser)
+                widgets_groups = WidgetsGroups.objects.filter(page=self.page, access_group__in=user_groups)
+                logger.debug(f'user card groups: {list(widgets_groups)}')
+                response = self.filter_widgets(widgets_groups, self.search_keywords, self.browser)
                 logger.debug(f'response: {response}')
                 return JsonResponse(response)
             else:

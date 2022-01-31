@@ -1,4 +1,4 @@
-// const endpointTimeUrl = currentLocation.href + 'home/time'
+const endpointTimeUrl = currentLocation.href + 'home/time'
 
 
 function isInternetExplorer() {
@@ -6,7 +6,7 @@ function isInternetExplorer() {
 }
 
 
-// Update time
+// // Update time
 // function updateHtmlTimeContainer(serverResponse) {
 //     document.getElementById('time_container').textContent = serverResponse.time
 // }
@@ -16,6 +16,7 @@ function isInternetExplorer() {
 // }
 
 
+// --------------------------------------------------------
 // Spinner show, hide functions
 function hideSpinner() {
     let spinner = document.getElementById('spinner')
@@ -35,14 +36,14 @@ function showSpinner() {
 function main() {
     if (isInternetExplorer()) {
         window.MSInputMethodContext && document.documentMode && document.write(
-            '<link rel="stylesheet" href="staticfiles/bootstrap-ie11/css/bootstrap-ie11.min.css">' +
-            '<script type="text/javascript" src="staticfiles/bootstrap-ie11/js/bootstrap.bundle.min.js"><\/script>' +
-            '<script type="text/javascript" src="staticfiles/bootstrap-ie11/js/polyfill.min.js"><\/script>' +
-            '<script type="text/javascript" src="staticfiles/bootstrap-ie11/js/ie11-custom-properties.js"><\/script>'
+            '<link rel="stylesheet" href="static/bootstrap-ie11/css/bootstrap-ie11.min.css">' +
+            '<script type="text/javascript" src="static/bootstrap-ie11/js/bootstrap.bundle.min.js"><\/script>' +
+            '<script type="text/javascript" src="static/bootstrap-ie11/js/polyfill.min.js"><\/script>' +
+            '<script type="text/javascript" src="static/bootstrap-ie11/js/ie11-custom-properties.js"><\/script>'
         );
     } else {
         let importScript = document.createElement('script');
-        importScript.setAttribute('src', 'staticfiles/bootstrap/js/bootstrap.bundle.min.js');
+        importScript.setAttribute('src', 'static/bootstrap/js/bootstrap.bundle.min.js');
         document.head.appendChild(importScript);
     }
 }

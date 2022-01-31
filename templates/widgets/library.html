@@ -1,0 +1,22 @@
+{% extends 'homepage/home-page-base.html' %} {% block page_content %}
+<div class="container-sm mt-5">
+    <nav class="navbar search-panel-container">
+        <h4>{{ header }}</h4>
+        <input id="search_field" class="search-panel form-control me-2" type="search" placeholder="{{ search_field_value }}" aria-label="Search">
+    </nav>
+
+    <div id="spinner" class="d-flex position-absolute top-50 start-50" hidden="false">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div class="text-center">
+        <h3 class="mt-5 mb-3">Я еще думаю над содержимым</h3>
+        {% load static %}
+        <img src="{% static 'project/img/i_am_cat.png' %}" style="width: 50%" class=" img-fluid" alt=" ">
+    </div>
+
+</div>
+{% endblock %} {% block script%} {% load static %}
+<script type="text/javascript" src="{% static 'project/js/media-library.js' %}"></script>
+{% endblock %}

@@ -1,5 +1,6 @@
 const currentLocation = window.location;
-const endpointMemoryWidgets = currentLocation.href + 'memory-widgets';
+// const endpointMemoryWidgets = currentLocation.href + 'memory-widgets';
+const endpointMemoryWidgets = '/memory-widgets';
 const widgetsСontainer = document.getElementById('widgetsContainer');
 const searchField = document.getElementById('searchField');
 const memoryWidgetModalTitle = document.getElementById('memoryWidgetModalTitle');
@@ -37,7 +38,6 @@ function cleanHtmlCardsContainer() {
 function showMemoryWidgetModal(memoryWidget) {
     let memoryWidgetModal = new bootstrap.Modal(document.getElementById('memoryWidgetModal'));
     let endpointUrlMemoryWidgets = endpointMemoryWidgets + '/' + memoryWidget.id;
-    console.log(endpointUrlMemoryWidgets)
 
     synceWithServer(endpointUrlMemoryWidgets, function(serverResponse) {
         success = serverResponse['success'];
@@ -71,7 +71,7 @@ function createHtmlWidget(widget) {
     aTag.className = "block-link";
 
     h5Header.textContent = widget.name;
-
+    
     if (widget.type == 'link_widget') {
         aTag.href = widget.url;
         aTag.target = '_blank';
@@ -127,12 +127,13 @@ function fillingWidgetsContainer(elementsArray) {
 
 function handlerResponseWidgets(serverResponse) {
     success = serverResponse['success']
-    listWidgets = serverResponse['list_widgets']
     if (success) {
+        listWidgets = serverResponse['list_widgets']
         fillingWidgetsContainer(listWidgets)
     } else {
         showDangerMessageForPage()
-        console.log('Attribute widget.type has an unknown value')
+        console.log('Received an unsuccessful response from the server')
+        console.log('Server messages: ' + serverResponse['message'])
     }
 }
 

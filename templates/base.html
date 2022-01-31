@@ -35,7 +35,8 @@
         </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    {% if user.is_authenticated %} {% if name_page == 'private_page' %}
+                    {% if user.is_authenticated %} 
+                    {% if name_page == 'private_page' %}
                     <li id="user_profile_item" class="nav-item active_menu_item">
                         <a class="nav-link" aria-current="page" href="{% url 'user-profile' slug=user.username %}">Моя панель</a>
                     </li>
@@ -43,15 +44,8 @@
                     <li id="user_profile_item" class="nav-item">
                         <a class="nav-link" aria-current="page" href="{% url 'user-profile' slug=user.username %}">Моя панель</a>
                     </li>
-                    {% endif %} {% if name_page == 'media_library_page' %}
-                    <li class="nav-item active_menu_item">
-                        <a class="nav-link" aria-current="page" href="{% url 'library' slug=user.username %}">Media-Library</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="{% url 'library' slug=user.username %}">Media-Library</a>
-                    </li>
-                    {% endif %} {% endif %}
+                    {% endif %} 
+                    {% endif %}
                 </ul>
                 <div class="text-end">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -61,14 +55,14 @@
                         <li><span class="nav-link active">Пользователь:</span></li>
                         {% if user.is_authenticated %}
                         <li class="nav-item me-4">
-                            <a id='username_field' class="nav-link active" href="{%url 'library' slug=user.username%}">{{ user.username }}</a>
+                            <a id='username_field' class="nav-link active" href="{%url 'user-profile' slug=user.username%}">{{ user.username }}</a>
                         </li>
                         <li class="nav-item">
                             <a type="button" href="{% url 'logout' %}" class="btn btn-outline-danger me-2">Выйти</a>
                         </li>
                         {% else %}
                         <li class="nav-item me-4">
-                            <a class="nav-link active" href="#">Гость</a>
+                            <a class="nav-link active" href="{% url 'login' %}">Гость</a>
                         </li>
                         <li class="nav-item">
                             <a type="button" href="{% url 'registration' %}" class="btn btn-outline-success me-2">Регистрация</a>
