@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -8,10 +9,57 @@ from widgets.models import PageWidgets, WidgetsGroups, MemoryWidgets, TypeBrowse
 
 logger = logging.getLogger('server')
 
-# User = settings.AUTH_USER_MODEL
+
+def _get_settings_value(property_attr: str) -> Optional[str]:
+    return HomepageSettings.objects.get(property_attribute=property_attr).property_value
+
+
+def _get_page_settings(name_page: str):
+    return PageWidgets.objects.get(const_sys_property=name_page)
+
+
+def _get_default_context_page_meta():
+    """Метод вызывется в случае ошибки при получении данных из бд"""
+    value = 'Unknown'
+    return {
+        'name_application': 'Homepage',
+        'search_field_value': value,
+        'title': value,
+        'header': value,
+        'name_page': value,
+    }
+
+
+def _get_all_types_browsers():
+    """Возвращает все типы браузеров из бд"""
+    return TypeBrowser.objects.all()
+
+
+def _get_link_widgets(widgets_groups, browser_type, search_keywords):
+    """Возвращает список ссылочных виджетов согласно заданным параметрам"""
+    if search_keywords is not None and len(search_keywords) > 0:
+        return [link_widget for link_widget in LinkWidgets.objects.filter(is_active=True,
+                                                                          widgets_groups=widgets_groups,
+                                                                          browser_type=browser_type).values()
+                if search_keywords.lower() in link_widget.get('name').lower()]
+    else:
+        return list(LinkWidgets.objects.filter(is_active=True, widgets_groups=widgets_groups,
+                                               browser_type=browser_type).values())
+
+
+def _get_memory_widgets(widgets_groups, browser_type, search_keywords):
+    """Возвращает список пямяток согласно заданным параметрам"""
+    if search_keywords is not None and len(search_keywords) > 0:
+        return [card for card in MemoryWidgets.objects.filter(is_active=True, widgets_groups=widgets_groups,
+                                                              browser_type=browser_type).values()
+                if search_keywords.lower() in card.get('name').lower()]
+    else:
+        return list(MemoryWidgets.objects.filter(is_active=True, widgets_groups=widgets_groups,
+                                                 browser_type=browser_type).values())
 
 
 class LibraryPageMixin:
+    """Создан для медиа библиотеки, которая пока не добавлена на сайт"""
     template_name = None
     name_page = None
 
@@ -19,33 +67,18 @@ class LibraryPageMixin:
     def page_meta(cls):
         context_page_meta = {}
         try:
-            logger.debug(f'Start HomePageMixin, name page: {cls.name_page}, method: page_meta')
-            context_page_meta['name_application'] = \
-                HomepageSettings.objects.get(property_attribute='name_application').property_value
-
-            context_page_meta['search_field_value'] = \
-                HomepageSettings.objects.get(property_attribute='search_field_value').property_value
-
-            logger.debug(f"Method: page_meta, name application: {context_page_meta['name_application']}")
-
-            context_page_meta['title'] = \
-                HomepageSettings.objects.get(property_attribute='title_media_library_page').property_value
-            logger.debug(f"Method: page_meta, title: {context_page_meta['title']}")
-
-            context_page_meta['header'] = \
-                HomepageSettings.objects.get(property_attribute='header_media_library_page').property_value
-            logger.debug(f"Method: page_meta, header: {context_page_meta['header']}")
-            logger.debug('End HomePageMixin, method: page_meta')
+            logger.debug(f'Start LibraryPageMixin, name page: {cls.name_page}, method: page_meta')
+            context_page_meta['name_application'] = _get_settings_value('name_application')
+            context_page_meta['search_field_value'] = _get_settings_value('search_field_value')
+            context_page_meta['title'] = _get_settings_value('title_media_library_page')
+            context_page_meta['header'] = _get_settings_value('header_media_library_page')
             context_page_meta['name_page'] = cls.name_page
+            logger.debug('End LibraryPageMixin, method: page_meta')
         except Exception as error:
-            value = 'Unknown'
-            context_page_meta['name_application'] = value
-            context_page_meta['search_field_value'] = value
-            context_page_meta['title'] = value
-            context_page_meta['header'] = value
-            context_page_meta['name_page'] = value
+            context_page_meta = _get_default_context_page_meta()
             logger.error(error)
         finally:
+            logger.debug('LibraryPageMixin return context_page_meta')
             return context_page_meta
 
     def get_context_data(self, **kwargs):
@@ -55,6 +88,10 @@ class LibraryPageMixin:
 
 
 class HomePageMixin:
+    """
+    Метод отдает контекст страниц страниц сайта shared_page и private_page.
+    Страницы отдаются без списка виджетов.
+    """
     template_name = None
     name_page = None
 
@@ -63,33 +100,18 @@ class HomePageMixin:
         context_page_meta = {}
         try:
             logger.debug(f'Start HomePageMixin, name page: {cls.name_page}, method: page_meta')
-            context_page_meta['name_application'] = \
-                HomepageSettings.objects.get(property_attribute='name_application').property_value
-            logger.debug(f"Method: page_meta, name application: {context_page_meta['name_application']}")
-
-            context_page_meta['search_field_value'] = \
-                HomepageSettings.objects.get(property_attribute='search_field_value').property_value
-            logger.debug(f"Method: page_meta, search_field_value: {context_page_meta['search_field_value']}")
-
-            logger.debug(f"Method: page_meta, name application: {context_page_meta['name_application']}")
-            page = PageWidgets.objects.get(const_sys_property=cls.name_page)
+            page = _get_page_settings(cls.name_page)
+            context_page_meta['name_application'] = _get_settings_value('name_application')
+            context_page_meta['search_field_value'] = _get_settings_value('search_field_value')
             context_page_meta['title'] = page.title
-
-            logger.debug(f"Method: page_meta, title: {context_page_meta['title']}")
             context_page_meta['header'] = page.header
-
-            logger.debug(f"Method: page_meta, header: {context_page_meta['header']}")
-            logger.debug('End HomePageMixin, method: page_meta')
             context_page_meta['name_page'] = cls.name_page
+            logger.debug('End HomePageMixin, method: page_meta')
         except Exception as error:
-            value = 'Unknown'
-            context_page_meta['name_application'] = value
-            context_page_meta['search_field_value'] = value
-            context_page_meta['title'] = value
-            context_page_meta['header'] = value
-            context_page_meta['name_page'] = value
+            context_page_meta = _get_default_context_page_meta()
             logger.error(error)
         finally:
+            logger.debug('HomePageMixin return context_page_meta')
             return context_page_meta
 
     def get_context_data(self, **kwargs):
@@ -128,6 +150,25 @@ class MemoryWidgetsMixin:
         return value
 
 
+class newWidgetsMixin:
+    """Базовый класс для SharedWidgetsMixin и PrivateWidgetMixin"""
+    page = None
+    search_keywords = None
+    browsers = None
+    is_authenticated_request = None
+
+    @classmethod
+    def define_browsers(cls, http_user_agent: str) -> list:
+        return [type_browser for type_browser in _get_all_types_browsers()
+                if type_browser.attribute in http_user_agent or type_browser.attribute == 'all']
+
+    # def define_search_keywords(self):
+    #     self.search_keywords = ''
+
+    def define_authenticated_request(self, request: str):
+        self.is_authenticated_request = request.user.is_authenticated
+
+
 class WidgetsMixin:
     search_keywords = None
     http_user_agent = None
@@ -136,13 +177,23 @@ class WidgetsMixin:
 
     @classmethod
     def get_type_browser(cls, http_user_agent):
+        print(http_user_agent)
         for browser in TypeBrowser.objects.all():
             if browser.attribute in http_user_agent or browser.attribute == 'all':
                 return browser
         return None
 
     @classmethod
+    def define_user(cls, request: str):
+        user = request.user
+        print('*' * 100)
+        print(user.is_authenticated)
+        print(f'type user: {type(user)}')
+        print('*' * 100)
+
+    @classmethod
     def request_meta(cls, request):
+        cls.define_user(request)
         cls.search_keywords = request.GET.get('search')
         logger.debug(f'Search keywords: {cls.search_keywords}')
         cls.http_user_agent = request.META['HTTP_USER_AGENT']
@@ -156,37 +207,14 @@ class WidgetsMixin:
     def filter_widgets(cls, widgets_groups, search_keywords, browser):
         list_widgets = []
         for group in widgets_groups:
-            if search_keywords is not None and len(search_keywords) > 0:
-                logger.debug(f'Search keywords is not None')
-                # widgets = list(LinkCards.objects.filter(is_active=True, widgets_groups=group, browser_type=browser,
-                #                                         name__icontains=search_keywords).values())
-                widgets = \
-                    [card for card in
-                     LinkWidgets.objects.filter(is_active=True, widgets_groups=group, browser_type=browser).values()
-                     if search_keywords.lower() in card.get('name').lower()]
 
-                logger.debug(f'Find link cards for group: {group}')
+            widgets = _get_link_widgets(widgets_groups=group, browser_type=browser,
+                                        search_keywords=search_keywords)
 
-                # widgets.extend(
-                #     MemoryCards.objects.filter(is_active=True, widgets_groups=group, browser_type=browser,
-                #                                name__icontains=search_keywords).values()
-                # )
-                widgets.extend(
-                    [card for card in
-                     MemoryWidgets.objects.filter(is_active=True, widgets_groups=group, browser_type=browser).values()
-                     if search_keywords.lower() in card.get('name').lower()]
-                )
-                logger.debug(f'Find memory cards for group: {group}')
-            else:
-                logger.debug(f'Search keywords is None')
-                widgets = \
-                    list(LinkWidgets.objects.filter(is_active=True, widgets_groups=group,
-                                                    browser_type=browser).values())
-                logger.debug(f'Find link cards for group: {group}')
-
-                widgets.extend(list(MemoryWidgets.objects.filter(is_active=True, widgets_groups=group,
-                                                                 browser_type=browser).values()))
-                logger.debug(f'Find memory cards for group: {group}')
+            widgets.extend(
+                _get_memory_widgets(widgets_groups=group, browser_type=browser,
+                                    search_keywords=search_keywords)
+            )
 
             if len(widgets) > 0:
                 list_widgets.append({group.show_name: widgets})
@@ -214,11 +242,11 @@ class WidgetsMixin:
 
 
 class PrivateWidgetsMixin(WidgetsMixin):
+    """
+    Данный миксин обслуживает запросы на получение виджетов пришедшие от зарегистрированных пользователей
+    """
 
     def get(self, request, **kwargs):
-        """
-        Данный миксин обслуживает запросы на получение виджетов пришедшие от зарегистрированных пользователей
-        """
         try:
             logger.debug('Start method get in class PrivateCardsMixin')
             user = request.user
