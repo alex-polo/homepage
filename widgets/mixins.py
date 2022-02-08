@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from django.core.handlers.wsgi import WSGIRequest
+from django.db.models import QuerySet
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
@@ -64,8 +65,12 @@ def _get_page(name_page: str):
     return PageWidgets.objects.get(const_sys_property=name_page)
 
 
-def _get_widget_groups(page):
+def _get_widget_groups_for_anonymous_user(page):
     return WidgetsGroups.objects.filter(page=page)
+
+
+def _get_widgets_groups_for_user(page: QuerySet, user_groups) -> QuerySet:
+    return WidgetsGroups.objects.filter(page=page, access_group__in=user_groups)
 
 
 class LibraryPageMixin:
@@ -143,7 +148,7 @@ class MemoryWidgetsMixin:
         logger.debug(f'Find shared widgets groups: {list(anon_card_group)}')
         logger.debug(f'Find user: {user}')
 
-        if user.is_authenticated:
+        if request.user.is_anonymous is False and user.is_active:
             logger.debug(f'User {user} is authenticated')
             user_groups = user.groups.all()
             logger.debug(f'Find user groups: {user_groups}')
@@ -167,7 +172,6 @@ class BaseWidgetsMixin:
     search_keywords = None
     http_user_agent = None
     type_browsers = None
-    is_authenticated_request = None
     widgets_groups = None
 
     @classmethod
@@ -176,71 +180,42 @@ class BaseWidgetsMixin:
                 if type_browser.attribute in http_user_agent or type_browser.attribute == 'all']
 
     def define_request_data(self, request: WSGIRequest):
-        user = request.user
+
         self.search_keywords = request.GET.get('search')
         self.http_user_agent = request.META['HTTP_USER_AGENT']
         self.type_browsers = self.define_browsers(self.http_user_agent)
         self.page = _get_page(self.name_page)
 
-        if user.is_authenticated_request:
-            user_groups = user.groups.all()
-            self.widgets_groups = WidgetsGroups.objects.filter(page=self.page, access_group__in=user_groups)
-        else:
-            self.widgets_groups = _get_widget_groups(self.page)
-
-    def get_list_widgets(self):
-        if self.search_keywords is not None and len(self.search_keywords) > 0:
-            pass
-        else:
-            pass
-
-    def get_widgets(self, request):
-        try:
-            self.define_request_data(request)
-            response = self.filter_widgets(self.widgets_groups, self.search_keywords, self.type_browsers)
-            return JsonResponse(response)
-        except Exception as error:
-            logger.error(error)
-            response = {'success': False, 'message': str(error)}
-            logger.debug(f'response: {response}')
-            return JsonResponse(response)
-
-
-class WidgetsMixin:
-    search_keywords = None
-    http_user_agent = None
-    browser = None
-    page = None
-
-    @classmethod
-    def get_type_browser(cls, http_user_agent):
-        return [type_browser for type_browser in _get_all_types_browsers()
-                if type_browser.attribute in http_user_agent or type_browser.attribute == 'all']
-
-    @classmethod
-    def filter_widgets(cls, widgets_groups, search_keywords, browser):
+    def filtering_widgets(self) -> dict:
         list_widgets = []
 
-        for group in widgets_groups:
-            widgets = _get_link_widgets(widgets_groups=group, browser_type=browser,
-                                        search_keywords=search_keywords)
-            widgets.extend(_get_memory_widgets(widgets_groups=group, browser_type=browser,
-                                               search_keywords=search_keywords))
+        for group in self.widgets_groups:
+            widgets = _get_link_widgets(widgets_groups=group, browser_type=self.type_browsers,
+                                        search_keywords=self.search_keywords)
+            widgets.extend(_get_memory_widgets(widgets_groups=group, browser_type=self.type_browsers,
+                                               search_keywords=self.search_keywords))
 
             if len(widgets) > 0:
                 list_widgets.append({group.show_name: widgets})
 
         response = {'success': True, 'list_widgets': list_widgets}
         return response
+        # if self.search_keywords is not None and len(self.search_keywords) > 0:
+        #     pass
+        # else:
+        #     pass
+
+
+class WidgetsMixin(BaseWidgetsMixin):
+    """
+    Данный миксин обслуживает запросы на получение виджетов пришедшие от зарегистрированных пользователей
+    """
 
     def get(self, request):
-        """
-        Данный миксин обслуживает запросы на получение виджетов пришедшие от зарегистрированных пользователей
-        """
         try:
-            self.request_meta(request)
-            response = self.filter_widgets(widgets_groups, self.search_keywords, self.browser)
-            return JsonResponse(response)
+            super().define_request_data(request)
+            self.widgets_groups = _get_widget_groups_for_anonymous_user(self.page)
+            return JsonResponse(self.filtering_widgets())
         except Exception as error:
             logger.error(error)
             response = {'success': False, 'message': str(error)}
@@ -248,25 +223,18 @@ class WidgetsMixin:
             return JsonResponse(response)
 
 
-class PrivateWidgetsMixin(WidgetsMixin):
+class PrivateWidgetsMixin(BaseWidgetsMixin):
     """
-    Данный миксин обслуживает запросы на получение виджетов пришедшие от зарегистрированных пользователей
+    Обслуживает запросы на получение виджетов пришедшие от зарегистрированных пользователей
     """
-
     def get(self, request, **kwargs):
         try:
             logger.debug('Start method get in class PrivateCardsMixin')
             user = request.user
-            logger.debug(f'username: {user.username}')
-            if user.is_authenticated:
-                logger.debug(f'User is authenticated')
-                self.request_meta(request)
-                user_groups = user.groups.all()
-                logger.debug(f'user groups: {list(user_groups)}')
-                widgets_groups = WidgetsGroups.objects.filter(page=self.page, access_group__in=user_groups)
-                logger.debug(f'user card groups: {list(widgets_groups)}')
-                response = self.filter_widgets(widgets_groups, self.search_keywords, self.browser)
-                logger.debug(f'response: {response}')
+            if request.user.is_anonymous is False and user.is_active:
+                super().define_request_data(request)
+                self.widgets_groups = _get_widgets_groups_for_user(page=self.page, user_groups=user.groups.all())
+                response = self.filtering_widgets()
                 return JsonResponse(response)
             else:
                 logger.debug(f'User is not authenticated')

@@ -7,7 +7,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic import TemplateView
 
-from widgets.mixins import MemoryWidgetsMixin, PrivateWidgetsMixin, WidgetsMixin, HomePageMixin
+from widgets.mixins import MemoryWidgetsMixin, PrivateWidgetsMixin, WidgetsMixin, HomePageMixin, BaseWidgetsMixin
 
 logger = logging.getLogger('server')
 
