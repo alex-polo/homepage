@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from hm_settings.models import HomepageSettings
 
-admin.site.site_header = 'Homepage, администрирование'
+admin.site.site_header = 'HOMEPAGE'
 
 
 @admin.register(HomepageSettings)

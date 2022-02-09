@@ -12,10 +12,7 @@
                 <div class="form-error text-start text-danger">{{ field.errors }}</div>
             </div>
             {% endfor %}
-            <!-- <div class="form-error ">{{ form.errors }}</div> -->
             <button class="btn btn-outline-success mt-3" type="submit ">Зарегистрироваться</button>
         </form>
-        <!-- {# Assumes you setup the password_reset view in your URLconf #}
-                <p><a href="{% url 'password_reset' %} ">Lost password?</a></p> -->
     </div>
     {% endblock %}

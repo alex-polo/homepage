@@ -21,7 +21,7 @@ class MemoryWidgetsAdmin(admin.ModelAdmin):
     list_display_links = ('name',)
     search_fields = ('name',)
     list_editable = ('is_active',)
-    list_filter = ('is_active',)
+    list_filter = ('is_active', 'widgets_groups',)
     exclude = ('type',)
 
 
@@ -35,7 +35,7 @@ class LinkWidgetsAdmin(admin.ModelAdmin):
     list_display_links = ('name',)
     search_fields = ('name',)
     list_editable = ('is_active',)
-    list_filter = ('is_active',)
+    list_filter = ('is_active', 'widgets_groups',)
     exclude = ('type',)
 
 

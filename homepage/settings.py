@@ -26,8 +26,7 @@ SECRET_KEY = 'django-insecure-y2&i(7$pf1995w8*b*jt2xss7!h2%ujxfd-8b1%q9r!1+n^3vl
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '192.168.254.67',
-    '127.0.0.1',
+    '*',
 ]
 
 # Application definition
@@ -39,9 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'hm_settings',
     'accounts',
     'widgets',
-    'hm_settings',
 ]
 
 MIDDLEWARE = [
