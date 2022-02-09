@@ -7,7 +7,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic import TemplateView
 
-from widgets.mixins import MemoryWidgetsMixin, PrivateWidgetsMixin, WidgetsMixin, HomePageMixin, BaseWidgetsMixin
+from widgets.mixins import MemoryWidgetsMixin, PrivateWidgetsMixin, WidgetsMixin, HomePageMixin
 
 logger = logging.getLogger('server')
 
@@ -42,6 +42,7 @@ class PrivateWidgetsPageView(LoginRequiredMixin, PrivateWidgetsMixin, View):
 @method_decorator(csrf_protect, name='dispatch')
 class MemoryWidgetsView(MemoryWidgetsMixin, View):
     """Отдает содержимое виджета памятки в соответствии с переданным id"""
+
     @classmethod
     def get(cls, request, pk):
         try:
@@ -50,25 +51,3 @@ class MemoryWidgetsView(MemoryWidgetsMixin, View):
         except Exception as error:
             logger.error(error)
             return JsonResponse({'success': False, 'error': error})
-
-
-# @method_decorator(csrf_protect, name='dispatch')
-# class MediaLibraryView(LoginRequiredMixin, LibraryPageMixin, TemplateView):
-#     template_name = 'homepage/library.html'
-#     name_page = 'media_library_page'
-#     login_url = 'login'
-
-
-# @method_decorator(csrf_protect, name='dispatch')
-# class TimeView(View):
-#     http_method_names = ['get']
-#
-#     @classonlymethod
-#     def json_context_data(self, request):
-#         json_data = {'time': time.strftime("%d.%m.%Y %H:%M:%S", time.localtime())}
-#         return json_data
-#
-#     @classmethod
-#     def get(cls, request):
-#         json_response = cls.json_context_data(request)
-#         return JsonResponse(json_response)

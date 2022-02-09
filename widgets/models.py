@@ -28,7 +28,7 @@ class WidgetsGroups(models.Model):
     description = models.CharField(verbose_name='Описание', max_length=255, unique=False, blank=True)
     page = models.ForeignKey(PageWidgets, on_delete=models.PROTECT, null=True, verbose_name='Страница')
     index_number = models.IntegerField(verbose_name='Порядок вывода')
-    access_group = models.ForeignKey(Group, on_delete=models.PROTECT, null=True, verbose_name='Группа пользователей', blank=True)
+    access_group = models.ManyToManyField(Group, verbose_name='Группы пользователей', blank=True)
     last_update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True)
 
     def __str__(self):
@@ -37,8 +37,8 @@ class WidgetsGroups(models.Model):
     class Meta:
         db_table = 'xxt_widgets_groups'
         ordering = ['index_number']
-        verbose_name = 'Группу карточек'
-        verbose_name_plural = 'Группы карточек'
+        verbose_name = 'Группу виджетов'
+        verbose_name_plural = 'Группы виджетов'
 
 
 class TypeBrowser(models.Model):
@@ -57,7 +57,7 @@ class TypeBrowser(models.Model):
     class Meta:
         db_table = 'xxt_widgets_type_browsers'
         verbose_name = 'Тип браузера'
-        verbose_name_plural = 'Тип браузера'
+        verbose_name_plural = 'Виды браузера'
 
 
 class MemoryWidgets(models.Model):
@@ -67,7 +67,7 @@ class MemoryWidgets(models.Model):
     name = models.CharField(verbose_name='Наименование', max_length=200, unique=False)
     content = models.TextField(verbose_name='Текст памятки', max_length=255, unique=False, null=True)
     type = models.CharField(max_length=50, default='memory_widget')
-    browser_type = models.ForeignKey(TypeBrowser, on_delete=models.PROTECT, null=True, verbose_name='Тип браузера')
+    browser_type = models.ManyToManyField(TypeBrowser, verbose_name='Браузеры')
     widgets_groups = models.ManyToManyField(WidgetsGroups, verbose_name='Группа')
     last_update_date = models.DateTimeField(verbose_name='Дата последнего обновления записи', auto_now=True)
 
@@ -78,7 +78,7 @@ class MemoryWidgets(models.Model):
         db_table = 'xxt_widgets_memory'
         ordering = ['index_number']
         verbose_name = 'Памятку'
-        verbose_name_plural = 'Список памяток'
+        verbose_name_plural = 'Памятки'
 
 
 class LinkWidgets(models.Model):
@@ -88,7 +88,7 @@ class LinkWidgets(models.Model):
     name = models.CharField(verbose_name='Наименование', max_length=200, unique=False)
     url = models.URLField(verbose_name='URL', max_length=255)
     type = models.CharField(max_length=50, default='link_widget')
-    browser_type = models.ForeignKey(TypeBrowser, on_delete=models.PROTECT, verbose_name='Тип браузера')
+    browser_type = models.ManyToManyField(TypeBrowser, verbose_name='Браузеры')
     widgets_groups = models.ManyToManyField(WidgetsGroups, verbose_name='Группа')
     last_update_date = models.DateTimeField(verbose_name='Дата последнего обновления записи', auto_now=True)
 
@@ -99,5 +99,4 @@ class LinkWidgets(models.Model):
         db_table = 'xxt_widgets_link'
         ordering = ['index_number']
         verbose_name = 'Ссылку'
-        verbose_name_plural = 'Список ссылок'
-
+        verbose_name_plural = 'Ссылки'

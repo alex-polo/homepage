@@ -1,6 +1,5 @@
 body {
     background-color: #edf2f9!important;
-    /* background-color: #dfdfdf */
 }
 
 main {
@@ -87,7 +86,6 @@ main {
 }
 
 .widget:hover {
-    /* background-color: #797979 !important; */
     background-color: #6d37a0 !important;
     color: #ffffff !important;
     cursor: pointer;

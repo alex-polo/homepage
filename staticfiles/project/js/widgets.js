@@ -1,5 +1,4 @@
 const currentLocation = window.location;
-// const endpointMemoryWidgets = currentLocation.href + 'memory-widgets';
 const endpointMemoryWidgets = '/memory-widgets';
 const widgetsСontainer = document.getElementById('widgetsContainer');
 const searchField = document.getElementById('searchField');
@@ -7,15 +6,11 @@ const memoryWidgetModalTitle = document.getElementById('memoryWidgetModalTitle')
 const memoryWidgetModalContent = document.getElementById('memoryWidgetModalContent');
 
 
-function showDangerMessageForPage() {
-    let pElement = document.createElement('p');
-    pElement.textContent = 'An unexpected error occurred on the page. Please contact your administrator.';
-    pElement.className = "danger-message-page text-center";
-    cleanHtmlCardsContainer();
-    widgetsСontainer.append(pElement);
-}
-
+/**
+  * Синхронизация с сервером
+  */
 function synceWithServer(url, callback) {
+    // Юзаем устаревший XMLHttpRequest, ie форева
     let xmlHttp = new XMLHttpRequest();
 
     xmlHttp.open("GET", url, false);
@@ -31,10 +26,29 @@ function synceWithServer(url, callback) {
     }
 }
 
-function cleanHtmlCardsContainer() {
+
+/**
+  * Выводим сообщение об ошибке пользователю
+  */
+function showDangerMessageForPage() {
+    let pElement = document.createElement('p');
+    pElement.textContent = 'An unexpected error occurred on the page. Please contact your administrator.';
+    pElement.className = "danger-message-page text-center";
+    cleanHtmlWidgetsContainer();
+    widgetsСontainer.append(pElement);
+}
+
+/**
+  * Удаляем все виджеты со страницы
+  */
+function cleanHtmlWidgetsContainer() {
     widgetsСontainer.innerHTML = '';
 }
 
+/**
+  * Показываем модальное окно с содержимым памятки
+  * @param  {Object} memoryWidget Виджет памятки полученный от сервера
+  */
 function showMemoryWidgetModal(memoryWidget) {
     let memoryWidgetModal = new bootstrap.Modal(document.getElementById('memoryWidgetModal'));
     let endpointUrlMemoryWidgets = endpointMemoryWidgets + '/' + memoryWidget.id;
@@ -53,7 +67,11 @@ function showMemoryWidgetModal(memoryWidget) {
     })
 }
 
-
+/**
+  * Возвращает html разметку переданного виджета
+  * @param  {Object} widget Виджет памятки полученный от сервера
+  * @returns {HTMLDivElement} Html разметка виджета
+  */
 function createHtmlWidget(widget) {
     let divColumn = document.createElement('div');
     let divCard = document.createElement('div');
@@ -96,6 +114,10 @@ function createHtmlWidget(widget) {
 }
 
 
+/**
+  * Заполняет div контейнер widgetsСontainer на html странице виджетами
+  * @param  {Array} widget Массив виджетов полученный от сервера
+  */
 function fillingWidgetsContainer(elementsArray) {
     for (let index = 0; index < elementsArray.length; index++) {
         group = elementsArray[index]
@@ -125,6 +147,11 @@ function fillingWidgetsContainer(elementsArray) {
     }
 }
 
+
+/**
+  * Callback функция передается в функцию synceWithServer
+  * @param  {Object} widget Массив виджетов полученный от сервера
+  */
 function handlerResponseWidgets(serverResponse) {
     success = serverResponse['success']
     if (success) {
@@ -137,12 +164,20 @@ function handlerResponseWidgets(serverResponse) {
     }
 }
 
+/**
+  * Функция обновляет div container с виджетами на html странице
+  * @param  {String} widget URL для соединения
+  * @param  {Function} widget Функция handlerResponseWidgets, передаваемая в качестве callback
+  */
 function searchWidgets(url, handlerCallback) {
     return function() {
         try {
+            // Показываем спинер
             showSpinner()
-            cleanHtmlCardsContainer()
-
+            // очищаем контейнер
+            cleanHtmlWidgetsContainer()
+            
+            // Выполняем запрос к серверу
             if (searchField.value.length > 0) {
                 endpointUrl = new URL(url);
                 endpointUrl.searchParams.set('search', searchField.value);
@@ -151,14 +186,20 @@ function searchWidgets(url, handlerCallback) {
 
             synceWithServer(endpointUrl, handlerCallback)
         } catch (error) {
+            // Печатаем ошибку в консоль и выводим сообщение пользователю
             console.log(error)
             showDangerMessageForPage()
         } finally {
+            // Прячем спинер
             hideSpinner()
         }
     }
 }
 
+
+/**
+  * Добавляет обработку событий набора текста и копирования для поля поиска на html странице
+  */
 function addEventsSearchWidgets(func) {
     searchField.onpaste = function() {
         func()
@@ -169,8 +210,6 @@ function addEventsSearchWidgets(func) {
 }
 
 function main() {
-    // let urlWidgets = NaN
-
     if (namePage == 'shared_page') {
         urlWidgets = currentLocation.href + 'home/shared-widgets'
     } else if (namePage == 'private_page')

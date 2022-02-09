@@ -1,20 +1,11 @@
 // const endpointTimeUrl = currentLocation.href + '/home/time'
-const endpointTimeUrl = window.location + '/home/time'
+// const endpointTimeUrl = window.location + '/home/time'
 
 
+// Проверка на интернет explorer
 function isInternetExplorer() {
     return window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigator.userAgent.indexOf('Trident/') > -1;
 }
-
-
-// // Update time
-// function updateHtmlTimeContainer(serverResponse) {
-//     document.getElementById('time_container').textContent = serverResponse.time
-// }
-
-// async function synceTime() {
-//     synceWithServer(endpointTimeUrl, updateHtmlTimeContainer)
-// }
 
 
 // --------------------------------------------------------

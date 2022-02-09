@@ -1,27 +1,22 @@
 from django.contrib import admin
 
-from widgets.models import WidgetsGroups, PageWidgets, MemoryWidgets, LinkWidgets, TypeBrowser
-
-
-@admin.register(PageWidgets)
-class PageCardAdmin(admin.ModelAdmin):
-    list_display = ('name_page',)
-    list_display_links = ('name_page',)
-    search_fields = ('name_page',)
+from widgets.models import WidgetsGroups, MemoryWidgets, LinkWidgets, TypeBrowser
 
 
 @admin.register(WidgetsGroups)
-class CardGroupsAdmin(admin.ModelAdmin):
-    list_display = ('name', 'page_id', 'index_number', 'description', 'last_update_date')
-    list_display_links = ('index_number', 'page_id', 'name', 'description')
-    search_fields = ('name', 'page_id', 'index_number')
+class WidgetsGroupsAdmin(admin.ModelAdmin):
+    list_display = ('name', 'page', 'index_number', 'description', 'last_update_date')
+    list_display_links = ('index_number', 'page', 'name', 'description')
+    list_filter = ('page',)
+    search_fields = ('name', 'page', 'index_number')
 
 
 @admin.register(MemoryWidgets)
-class MemoryCardAdmin(admin.ModelAdmin):
-    list_display = ('index_number',
+class MemoryWidgetsAdmin(admin.ModelAdmin):
+    list_display = ('is_active',
                     'name',
-                    'is_active',
+                    'content',
+                    'index_number',
                     'last_update_date')
     list_display_links = ('name',)
     search_fields = ('name',)
@@ -31,10 +26,11 @@ class MemoryCardAdmin(admin.ModelAdmin):
 
 
 @admin.register(LinkWidgets)
-class LinkCardsAdmin(admin.ModelAdmin):
-    list_display = ('index_number',
+class LinkWidgetsAdmin(admin.ModelAdmin):
+    list_display = ('is_active',
                     'name',
-                    'is_active',
+                    'url',
+                    'index_number',
                     'last_update_date')
     list_display_links = ('name',)
     search_fields = ('name',)
